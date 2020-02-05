@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>酒店管理平台</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+  </head>
+  <body>
+
+    <!-- 标题 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand">XXHOTEL</a>
+        
+        <div id="my-nav" class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+               <div class="dropdown">
+                   <button id="my-dropdown" class="btn btn-link text-success dropdown-toggle" data-toggle="dropdown" >酒店管理</button>
+                   <div class="dropdown-menu" aria-labelledby="my-dropdown">
+                       <a class="dropdown-item btn btn-link text-success" href="index.html">入住登记</a>
+                       <a class="dropdown-item btn btn-link text-success" href="index-1.html">离店结账</a>
+                       
+                   </div>
+               </div>
+               
+            </ul>
+        </div>
+    </nav>
+    <div class="jumbotron jumbotron-fluid m-3">
+       
+        <div class="container">
+            <h1 class="display-3">酒店管理平台</h1>
+            <p class="lead"><span class="badge badge-pill badge-danger">牛耳教育</span></p>
+        </div>
+    </div>
+
+    <!-- 主体 -->
+    <div class="container-fluid">
+        <div class="row">
+			<div class="col-lg-3"></div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">入住登记</h4>
+                        <!-- 表单 入住登记 -->
+                        <form action="" id="checkinFrom">
+                            <div class="form-group">
+                                <label for="">姓名</label>
+                                <input type="text"class="form-control"
+                                name="name"
+                                required
+                                placeholder="姓名">
+                            </div>
+                            <div class="form-group">
+                                <label for="">性别</label>
+                                <label class="radio-inline">
+					<input type="radio" name="gender"  value="男" checked>男
+				  </label>
+				  <label class="radio-inline">
+					<input type="radio" name="gender"  value="女">女
+				  </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="">证件类型</label>
+                                <select class="form-control" name="cardtype">
+                    <option>身份证</option>
+                    <option>护照号</option>
+                    <option>军官证</option>
+                  </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="">证件号</label>
+                                <input type="text"class="form-control"
+                                name="cardno"
+                                required
+                                placeholder="证件号">
+                            </div>
+                             <div class="form-group ">
+                  <label for="">房间类型</label>
+                  <select class="form-control"  id="roomtype">
+                    <option value="0">请选择</option>
+
+                  </select>
+                </div>
+				<div class="form-group ">
+                  <label for="">房号</label>
+                  <select class="form-control" name="roomid" id="roomid">
+                    <option value="0">请选择</option>
+
+                  </select>
+                </div>
+				
+							<div class="form-group">
+                                <label for="">入住天数</label>
+                                <input type="number" min="1" value="1" class="form-control"
+                                name="num"
+                                required
+                                >
+								
+                            </div>
+                            <button type="button" class="btn btn-block btn-success" id="btnSave">保存</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <script>
+
+     $(function () {
+         //页面加载完就查询，房间类型
+         query();
+         function query(){
+             $.ajax({
+                 url:"rooms",
+
+                 dataType:"json",
+                 success:function (data) {
+                     data.forEach(typename=>{
+                         let $op=$(`<option>${typename}</option>`)
+                         $("#roomtype").append($op)
+                     })
+                 }
+             })
+         }
+
+
+         $("#roomtype").change(function () {
+             //查询对应房间类型未使用的房间编号
+                let roomtype=$("#roomtype").val();
+                if(roomtype!='0'){
+                    $("#roomid").empty();
+                    $("#roomid").append(`<option value="0">请选择</option>`);
+                    $.ajax({
+                        url:"rooms",
+                        data:{roomtype:roomtype,action:"findRoomId"},
+                        dataType:"json",
+                        success:function (data) {
+                            if(data.length==0){
+                                alert("该类型房间没有空闲")
+                            }else{
+                                data.forEach(roomids=>{
+                                    let $op1=$(`<option>${roomids}</option>`)
+
+                                    $("#roomid").append($op1)
+
+                                })
+                            }
+
+                        }
+
+                    })
+                }
+
+         })
+
+
+         //保存按钮的事件
+         $("#btnSave").click(function () {
+             //未进行表单校验
+             $.ajax({
+                 url:"checkins",
+                 type:"post",
+                 data:$("#checkinFrom").serialize(),
+                 dataType:"json",
+                 success:function (data) {
+                     if(data.suc){
+                         alert("入住登记成功!");
+                         //表单参数还原
+                         $("#checkinFrom").get(0).reset()
+                     }else{
+                         alert("入住登记失败!");
+                     }
+                 }
+
+             })
+         })
+
+     })
+    </script>
+</body>
+</html>
